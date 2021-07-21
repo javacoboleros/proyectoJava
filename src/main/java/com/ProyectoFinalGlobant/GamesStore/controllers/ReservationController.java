@@ -46,10 +46,10 @@ public class ReservationController {
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     public ReservationModel createReservation(@RequestBody ReservationModel reservation) throws ReservationBadRequestException, GameBadStatusException {
-        if (fieldsAreValid(reservation)){
+        if (!fieldsAreValid(reservation)){
             throw new ReservationBadRequestException("Empty field on creation request");
         }
-        if (!emailIsValid(reservation.getEmail())) throw new ReservationBadRequestException("Invalid email on creation request");
+        if (!emailIsValid(reservation.getEmail().toUpperCase())) throw new ReservationBadRequestException("Invalid email on creation request");
         return reservationService.saveReservation(reservation);
     }
 
@@ -58,9 +58,9 @@ public class ReservationController {
     public ReservationModel updateReservation(@RequestBody ReservationModel reservation, @PathVariable("id") Long id)
             throws ReservationBadRequestException, ReservationNotFoundException {
         if (!fieldsAreValid(reservation)) {
-            throw new ReservationBadRequestException("Empty field on creation request");
+            throw new ReservationBadRequestException("Empty field on update request");
         }
-        if (!emailIsValid(reservation.getEmail())) throw new ReservationBadRequestException("Invalid email on creation request");
+        if (!emailIsValid(reservation.getEmail().toUpperCase())) throw new ReservationBadRequestException("Invalid email on update request");
         return reservationService.updateReservation(reservation, id);
 
     }
@@ -87,17 +87,18 @@ public class ReservationController {
 
     public boolean emailIsValid(String email) {
         return email.contains("@") &&
-                (email.endsWith(".com") || email.endsWith(".cl"));
+                (email.endsWith(".COM") || email.endsWith(".CL"));
     }
 
     public boolean fieldsAreValid(ReservationModel reservation)  {
-        if ((reservation.getGameId() == 0) ||
+        if ((reservation.getGameId() == null) ||
                 (reservation.getDocumentNumber() == null) ||
                 (reservation.getName() == null) ||
                 (reservation.getLastName() == null) ||
                 (reservation.getEmail() == null)){
             return false;
         }
+        if (reservation.getGameId() <= 0) return false;
         return true;
     }
 }

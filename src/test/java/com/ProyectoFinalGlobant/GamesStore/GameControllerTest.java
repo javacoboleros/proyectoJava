@@ -1,16 +1,12 @@
 package com.ProyectoFinalGlobant.GamesStore;
 
 import com.ProyectoFinalGlobant.GamesStore.controllers.GameController;
-import com.ProyectoFinalGlobant.GamesStore.exceptions.GameBadRequestException;
-import com.ProyectoFinalGlobant.GamesStore.exceptions.GameBadStatusException;
 import com.ProyectoFinalGlobant.GamesStore.models.GameModel;
 import com.ProyectoFinalGlobant.GamesStore.services.GameService;
 import com.ProyectoFinalGlobant.GamesStore.services.ReservationService;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

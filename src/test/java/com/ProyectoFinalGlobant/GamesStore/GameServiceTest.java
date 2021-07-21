@@ -8,13 +8,11 @@ import com.ProyectoFinalGlobant.GamesStore.repositories.GameRepository;
 import com.ProyectoFinalGlobant.GamesStore.services.GameService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
@@ -24,7 +22,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-//@ExtendWith(MockitoExtension.class)
+
 @RunWith(MockitoJUnitRunner.class)
 class GameServiceTest {
 	@InjectMocks
@@ -176,7 +174,7 @@ class GameServiceTest {
 		game1.setCopies(0L);
 		Exception exception =
 				assertThrows(GameBadRequestException.class, () -> gameService.createGame(game1));
-		assertEquals("Can't create game without copies :/", exception.getMessage());
+		assertEquals("ALERT. Can't create game without copies :/", exception.getMessage());
 	}
 
 	@Test

@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -67,11 +68,29 @@ class ReservationControllerTest {
     }
 
     @Test
+    void shouldGetReservationByIdReservationNotFoundException () throws Exception {
+        long reservationId = reservation1.getId();
+        given(reservationService.getReservationById(reservation1.getId())).willReturn(Optional.empty());
+        mockMvc.perform(get("/reservation/{reservationId}", reservationId))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("Reservation " + reservationId + " does not exist")));
+    }
+
+    @Test
     void shouldGetAllReservationsByGameId() throws Exception {
         long gameId = reservation1.getGameId();
         given(reservationService.getReservationByGameId(gameId)).willReturn(reservationList);
         mockMvc.perform(get("/reservation/game/{gameId}", gameId))
                 .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @Test
+    void shouldGetReservationByGameIdReservationNotFoundException () throws Exception {
+        long gameId = reservation1.getGameId();
+        given(reservationService.getReservationByGameId(reservation1.getGameId())).willReturn(new ArrayList<ReservationModel>());
+        mockMvc.perform(get("/reservation/game/{gameId}", gameId))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("There is no reservations for game " + gameId)));
     }
 
     @Test
@@ -83,6 +102,104 @@ class ReservationControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", is("Juan")));
+        mockMvc.perform(post("/reservation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"gameId\":1, \"name\":\"Juan\", \"lastName\":\"Perez\", \"documentNumber\":\"0001\", \"email\":\"MAIL1@MAIL.COM\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name", is("Juan")));
+    }
+
+    @Test
+    void shouldCreateNewReservationReservationBadRequestExceptionFields() throws Exception {
+        given(reservationService.saveReservation(any())).willReturn(reservation1);
+        mockMvc.perform(post("/reservation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"gameId\":1, \"lastName\":\"Perez\", \"documentNumber\":\"0001\", \"email\":\"mail1@mail.com\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("Empty field on creation request")));
+        mockMvc.perform(post("/reservation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"gameId\":0, \"name\":\"Juan\", \"lastName\":\"Perez\", \"documentNumber\":\"0001\", \"email\":\"mail1@mail.com\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("Empty field on creation request")));
+        mockMvc.perform(post("/reservation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"name\":\"Juan\", \"lastName\":\"Perez\", \"documentNumber\":\"0001\", \"email\":\"mail1@mail.com\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("Empty field on creation request")));
+        mockMvc.perform(post("/reservation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"gameId\":1, \"name\": \"Juan\", \"documentNumber\":\"0001\", \"email\":\"mail1@mail.com\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("Empty field on creation request")));
+        mockMvc.perform(post("/reservation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"gameId\":1, \"name\": \"Juan\", \"lastName\":\"Perez\", \"email\":\"mail1@mail.com\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("Empty field on creation request")));
+        mockMvc.perform(post("/reservation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"gameId\":1, \"name\": \"Juan\", \"lastName\":\"Perez\", \"documentNumber\":\"0001\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("Empty field on creation request")));
+    }
+
+    @Test
+    void shouldCreateNewReservationReservationBadRequestExceptionEmail() throws Exception {
+        mockMvc.perform(post("/reservation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"gameId\":1, \"name\":\"Juan\", \"lastName\":\"Perez\", \"documentNumber\":\"0001\", \"email\":\"mail1mail.com\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("Invalid email on creation request")));
+        mockMvc.perform(post("/reservation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"gameId\":1, \"name\":\"Juan\", \"lastName\":\"Perez\", \"documentNumber\":\"0001\", \"email\":\"mail1@mail\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("Invalid email on creation request")));
+    }
+
+    @Test
+    void shouldUpdateReservation() throws Exception {
+        long reservationId = reservation1.getId();
+        given(reservationService.updateReservation(any(), any())).willReturn(reservation1);
+        mockMvc.perform(put("/reservation/{reservationId}", reservationId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"gameId\":1, \"name\":\"Juan\", \"lastName\":\"Perez\", \"documentNumber\":\"0001\", \"email\":\"mail1@mail.com\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is("Juan")));
+    }
+
+    @Test
+    void shouldUpdateReservationReservationBadRequestExceptionFields() throws Exception {
+        long reservationId = reservation1.getId();
+        mockMvc.perform(put("/reservation/{reservationId}", reservationId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"name\":\"Juan\", \"lastName\":\"Perez\", \"documentNumber\":\"0001\", \"email\":\"mail1@mail.com\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("Empty field on update request")));
+        //"gameId":1,
+    }
+
+    @Test
+    void shouldUpdateReservationReservationBadRequestExceptionEmail() throws Exception {
+        long reservationId = reservation1.getId();
+        mockMvc.perform(put("/reservation/{reservationId}", reservationId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"gameId\":1,\"name\":\"Juan\", \"lastName\":\"Perez\", \"documentNumber\":\"0001\", \"email\":\"mail1mail.com\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("Invalid email on update request")));
     }
 
     @Test
@@ -94,10 +211,28 @@ class ReservationControllerTest {
     }
 
     @Test
+    void shouldDeleteReservationByIdReservationNotFoundException() throws Exception {
+        long reservationId = reservation1.getId();
+        given(reservationService.deleteReservationById(reservationId)).willReturn(false);
+        mockMvc.perform(delete("/reservation/{reservationId}", reservationId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is("Reservation " + reservationId + " does not exist")));
+    }
+
+    @Test
     void shouldDeleteReservationByGameId() throws Exception {
         long gameId = reservation1.getGameId();
         given(reservationService.deleteReservationByGameId(gameId)).willReturn(1L);
         mockMvc.perform(delete("/reservation/delete/{gameId}", gameId))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldDeleteReservationByGameIdReservationNotFoundException() throws Exception {
+        long gameId = reservation1.getGameId();
+        given(reservationService.deleteReservationByGameId(gameId)).willReturn(0L);
+        mockMvc.perform(delete("/reservation/delete/{gameId}", gameId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is("There is no reservations for game " + gameId)));
     }
 }

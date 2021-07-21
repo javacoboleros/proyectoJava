@@ -22,6 +22,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Optional;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -114,6 +116,31 @@ class ReservationServiceTest {
         MockitoAnnotations.openMocks(this);
         String documentAfter = reservationService.fixDocumentNumber(documentBefore);
         assertNotEquals(documentBefore,documentAfter);
+    }
+
+    //Exceptions
+    @Test
+    void ShouldSaveReservationReservationBadRequestException(){
+        MockitoAnnotations.openMocks(this);
+        when(mockReservationRepository.findByDocumentNumberAndGameId(any(),any())).thenReturn(reservationList);
+        Exception exception = assertThrows(ReservationBadRequestException.class, () -> reservationService.saveReservation(reservation1));
+        assertEquals("Game already reserved by user", exception.getMessage());
+    }
+
+    @Test
+    void shouldUpdateReservationReservationNotFoundException(){
+        MockitoAnnotations.openMocks(this);
+        when(mockReservationRepository.findById(any())).thenReturn(Optional.empty());
+        Exception exception = assertThrows(ReservationNotFoundException.class, () -> reservationService.updateReservation(reservation1, reservation1.getId()));
+        assertEquals("Reservation does not exist, sorry.", exception.getMessage());
+    }
+
+    @Test
+    void shouldDeleteReservationByIdReservationNotFoundExceptios(){
+        MockitoAnnotations.openMocks(this);
+        when(mockReservationRepository.findById(any())).thenReturn(Optional.empty());
+        Exception exception = assertThrows(ReservationNotFoundException.class, () -> reservationService.deleteReservationById(reservation1.getId()));
+        assertEquals("Reservation does not exist", exception.getMessage());
     }
 
 }
