@@ -47,7 +47,13 @@ public class GameService {
     }
 
     //UPDATE GAME
-    public void updateGame(GameModel game, @PathVariable("id") Long id) throws GameBadRequestException {
+    public void updateGame(GameModel game, @PathVariable("id") Long id) throws GameBadRequestException,GameAlreadyExistException {
+
+        GameModel  gameModel= gameRepository.findByTitleAndConsole(game.getTitle().toUpperCase(),game.getConsole().toUpperCase());
+
+        if(gameModel != null ){
+            throw new GameAlreadyExistException ("ALERT: Game already exist in database", game.getTitle());
+        }
 
             Long  number= game.getCopies();
 

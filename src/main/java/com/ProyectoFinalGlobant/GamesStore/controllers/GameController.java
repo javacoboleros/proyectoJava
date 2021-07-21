@@ -32,7 +32,7 @@ public class GameController {
 
     //UPDATE GAME BY ID
     @PutMapping("/update/{id}")
-    public String updateGame(@RequestBody GameModel game, @PathVariable("id") Long id) throws GameBadRequestException {
+    public String updateGame(@RequestBody GameModel game, @PathVariable("id") Long id) throws GameBadRequestException,GameAlreadyExistException {
 
            gameService.updateGame(game, id);
 

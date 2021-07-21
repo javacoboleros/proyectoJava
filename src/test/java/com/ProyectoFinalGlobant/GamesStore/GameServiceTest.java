@@ -159,6 +159,17 @@ class GameServiceTest {
 	}
 
 	@Test
+	void shouldUpdateGameGameAlreadyExistException() {
+		MockitoAnnotations.openMocks(this);
+		when(gameRepository.findByTitleAndConsole(any(),any())).thenReturn(game1);
+		Exception exception =
+				assertThrows(GameAlreadyExistException.class, () -> gameService.updateGame(game1, game1.getId()));
+		assertEquals("ALERT: Game already exist in database", exception.getMessage());
+
+
+	}
+
+	@Test
 	void shouldCreateGameGameAlreadyExistException() {
 		MockitoAnnotations.openMocks(this);
 		when(gameRepository.findByTitleAndConsole(any(),any())).thenReturn(game1);
