@@ -25,7 +25,7 @@ public class GameService {
     private GameRepository gameRepository;
 
     //POST CREATE GAMES
-    public void createGame(@RequestBody GameModel game) throws GameAlreadyExistException, GameBadRequestException {
+    public void createGame(GameModel game) throws GameAlreadyExistException, GameBadRequestException {
 
         GameModel  gameModel= gameRepository.findByTitleAndConsole(game.getTitle().toUpperCase(),game.getConsole().toUpperCase());
 
@@ -47,7 +47,7 @@ public class GameService {
     }
 
     //UPDATE GAME
-    public void updateGame(GameModel game, @PathVariable("id") Long id) throws GameBadRequestException,GameAlreadyExistException {
+    public void updateGame(GameModel game, Long id) throws GameBadRequestException,GameAlreadyExistException {
 
         GameModel  gameModel= gameRepository.findByTitleAndConsole(game.getTitle().toUpperCase(),game.getConsole().toUpperCase());
 
@@ -94,7 +94,7 @@ public class GameService {
     }
 
     //DELETE BY ID
-    public void deleteGameById(@PathVariable("id") Long id) throws GameNotExistException {
+    public void deleteGameById(Long id) throws GameNotExistException {
         Optional<GameModel> gameOptional = gameRepository.findById(id);
 
         if(gameOptional.isEmpty()){
@@ -112,7 +112,7 @@ public class GameService {
     }
 
     //GET GAME BY STATUS
-    public List<GameModel> getByStatus(@PathVariable("status") String status) throws GameNotExistException{
+    public List<GameModel> getByStatus(String status) throws GameNotExistException{
 
         List<GameModel> gameStatus = gameRepository.findByStatus(status);
 
@@ -125,7 +125,7 @@ public class GameService {
     }
 
     //GET GAME BY ID
-    public GameModel getGameById(@PathVariable("id") Long id) throws GameNotExistException  {
+    public GameModel getGameById(Long id) throws GameNotExistException  {
         Optional<GameModel> gameOptional = gameRepository.findById(id);
 
         if(gameOptional.isEmpty()){
