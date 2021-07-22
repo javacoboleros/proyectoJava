@@ -100,4 +100,37 @@ class GameControllerTest {
         mockMvc2.perform(delete("/games/delete/{gameId}", gameId))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void shouldCreateGameBadRequestExceptionFields() throws Exception {
+        mockMvc2.perform(post("/games/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"title\": \"\", \"console\":\"console1\", \"creationDate\":\"2020-04-01\", \"copies\":1, \"status\":\"AVAILABLE\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("ALERT: Empty field on creation request")));
+        mockMvc2.perform(post("/games/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"console\":\"console1\", \"creationDate\":\"2020-04-01\", \"copies\":1, \"status\":\"AVAILABLE\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("ALERT: Empty field on creation request")));
+    }
+    @Test
+    void shouldUpdateGameBadRequestExceptionFields() throws Exception {
+        long id= game1.getId();
+        mockMvc2.perform(put("/games/update/{id}",id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"title\":\"title1\", \"creationDate\":\"2020-04-01\", \"copies\":1, \"status\":\"AVAILABLE\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("ALERT: Empty field on update request")));
+        mockMvc2.perform(put("/games/update/{id}",id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"title\":\"title1\", \"console\":\"\", \"creationDate\":\"2020-04-01\", \"copies\":1, \"status\":\"AVAILABLE\" }")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("ALERT: Empty field on update request")));
+    }
+
 }

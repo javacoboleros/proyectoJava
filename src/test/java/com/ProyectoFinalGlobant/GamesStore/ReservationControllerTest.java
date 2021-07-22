@@ -184,7 +184,7 @@ class ReservationControllerTest {
         long reservationId = reservation1.getId();
         mockMvc.perform(put("/reservation/{reservationId}", reservationId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{ \"name\":\"Juan\", \"lastName\":\"Perez\", \"documentNumber\":\"0001\", \"email\":\"mail1@mail.com\" }")
+                .content("{ \"name\":\"Juan\", \"email\":\"mail1@mail.com\" }")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.message", is("Empty field on update request")));

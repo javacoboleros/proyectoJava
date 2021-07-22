@@ -26,17 +26,29 @@ public class GameController {
    //CREATE GAME
    @PostMapping("/create")
    public ResponseEntity<Void> createGames(@RequestBody GameModel  game) throws GameAlreadyExistException, GameBadRequestException {
-         gameService.createGame(game);
-         return ResponseEntity.status(HttpStatus.CREATED).build();
+       if ((game.getTitle() == null) || (game.getTitle() == "") ||
+               (game.getConsole() == null) || (game.getConsole() == "") ||
+               (game.getCreationDate()== null) || (game.getCreationDate()=="")||
+               (game.getCopies()== null)){
+           throw new GameBadRequestException("ALERT: Empty field on creation request");
+       }else {
+           gameService.createGame(game);
+           return ResponseEntity.status(HttpStatus.CREATED).build();
+       }
    }
 
     //UPDATE GAME BY ID
     @PutMapping("/update/{id}")
     public String updateGame(@RequestBody GameModel game, @PathVariable("id") Long id) throws GameBadRequestException,GameAlreadyExistException {
-
-           gameService.updateGame(game, id);
-
-           return "INFO: Game Id: "+ id +" updated correctly";
+         if ((game.getTitle() == null) || (game.getTitle() == "") ||
+                (game.getConsole() == null) || (game.getConsole() == "") ||
+                (game.getCreationDate()== null) || (game.getCreationDate()=="")||
+                (game.getCopies()== null)){
+            throw new GameBadRequestException("ALERT: Empty field on update request");
+        }else {
+             gameService.updateGame(game, id);
+             return "INFO: Game Id: " + id + " updated correctly";
+        }
     }
 
     //DELETE GAME BY ID

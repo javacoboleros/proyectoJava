@@ -51,24 +51,25 @@ public class GameService {
 
         GameModel  gameModel= gameRepository.findByTitleAndConsole(game.getTitle().toUpperCase(),game.getConsole().toUpperCase());
 
-        if(gameModel != null ){
+        if(gameModel != null && gameModel.getId() != id){
             throw new GameAlreadyExistException ("ALERT: Game already exist in database", game.getTitle());
         }
-
-            Long  number= game.getCopies();
-
-            if( number == 0) {
+        if (game.getCreationDate().matches("\\d{4}-\\d{2}-\\d{2}")) {
+            Long number = game.getCopies();
+            if (number == 0) {
                 game.setStatus("RESERVED");
             }
-            if (number > 0){
+            if (number > 0) {
                 game.setStatus("AVAILABLE");
             }
-            if (number < 0){
+            if (number < 0) {
                 throw new GameBadRequestException("The game can't have negative copies.");
             }
-
             game.setId(id);
             gameRepository.save(game);
+        }else {
+            throw new GameBadRequestException("ALERT. Wrong format date, Use yyyy-MM-dd format.");
+        }
     }
 
     public GameModel updateGameQuantity(Long id, Integer quantity) throws GameBadStatusException {

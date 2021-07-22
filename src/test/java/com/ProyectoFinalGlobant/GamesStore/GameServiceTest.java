@@ -30,7 +30,7 @@ class GameServiceTest {
 	@Mock
 	private GameRepository gameRepository;
 	private GameModel game1 = new GameModel(1L, "game1", "console1", "2021-07-15", 5L, "AVAILABLE");
-	private GameModel game2 = new GameModel(1L, "game1", "console1", "2021-07-15", 5L, "AVAILABLE");
+	private GameModel game2 = new GameModel(2L, "game1", "console1", "2021-07-15", 5L, "AVAILABLE");
 	private ArrayList<GameModel> gameList;
 	@BeforeEach
 	void fillList() {
@@ -163,7 +163,7 @@ class GameServiceTest {
 		MockitoAnnotations.openMocks(this);
 		when(gameRepository.findByTitleAndConsole(any(),any())).thenReturn(game1);
 		Exception exception =
-				assertThrows(GameAlreadyExistException.class, () -> gameService.updateGame(game1, game1.getId()));
+				assertThrows(GameAlreadyExistException.class, () -> gameService.updateGame(game2, game2.getId()));
 		assertEquals("ALERT: Game already exist in database", exception.getMessage());
 
 
@@ -195,6 +195,16 @@ class GameServiceTest {
 		game1.setCreationDate("10-10-2010");
 		Exception exception =
 				assertThrows(GameBadRequestException.class, () -> gameService.createGame(game1));
+		assertEquals("ALERT. Wrong format date, Use yyyy-MM-dd format.", exception.getMessage());
+	}
+
+	@Test
+	void shouldUpdateGameGameBadRequestExceptionDate(){
+		MockitoAnnotations.openMocks(this);
+		when(gameRepository.findByTitleAndConsole(any(),any())).thenReturn(null);
+		game1.setCreationDate("10-10-2010");
+		Exception exception =
+				assertThrows(GameBadRequestException.class, () -> gameService.updateGame(game1, game1.getId()));
 		assertEquals("ALERT. Wrong format date, Use yyyy-MM-dd format.", exception.getMessage());
 	}
 }
